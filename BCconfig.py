@@ -1,7 +1,7 @@
 # This is the configuration file for blinkcontrols. 
 
 # -- General Configuration -- 
-email = "CHANGE ME"
+email = "CHANGE ME" # May also be called username in the blink API?
 password = "CHANGE ME"
 
 syncmodule = "CHANGE ME"

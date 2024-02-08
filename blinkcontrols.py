@@ -2,26 +2,26 @@ from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
 from blinkpy.api import *
 from tkinter import *
+from pathlib import Path
+from aiohttp import ClientSession
 from BCconfig import * # aware of the bad code practice, will fix later.
 import tkinter
+import os
 import requests
+import asyncio
 
-blink = Blink()
-blink.auth = Auth()
 screen = tkinter.Tk()
 
-headers = {
-    'Content-Type': 'application/json',
-}
-json_data = {
-    'unique_id': '00000000-0000-0000-0000-000000000000',
-    'password': BCconfig.password,
-    'email': BCconfig.email,
-}
-response = requests.post('https://rest-prod.immedia-semi.com/api/v5/account/login', headers=headers, json=json_data)
-print(response)
+async def start():
+    blink = Blink(session=ClientSession())
+    auth = Auth({"username": BCconfig.email, "password": BCconfig.password}, no_prompt=True)
+    blink.auth = auth
+    await blink.start()
+    return blink
+blink = asyncio.run(start())
 
-blink.start()
+# await auth.send_auth_key(blink, BCconfig.key) or change to login prompt
+# await blink.setup_post_verify()
 
 # When initialized, print some useful information.
 for name, camera in blink.cameras.items():
@@ -33,35 +33,36 @@ for name, camera in blink.cameras.items():
 
 # Arms the camera by enabling motion alerts.
 # Note: You can disable motion controls for individual cameras.
-def armCamera():
-    blink.sync[BCconfig.syncmodule].arm = True
-    blink.refresh()
+async def armCamera():
+    await blink.sync[BCconfig.syncmodule].async_arm(True)
+    await blink.refresh()
 
 # Disarms the camera by disabling motion alerts.
 # Note: You can disable motion controls for individual cameras.
-def disarmCamera():
-    blink.sync[BCconfig.syncmodule].arm = False
-    blink.refresh()
+async def disarmCamera():
+    await blink.sync[BCconfig.syncmodule].async_arm(False)
+    await blink.refresh()
     
     
 # Downloads all videos from the past week days of this app being created.
 # You can customize the delay, and since parameters.
-def downloadAllVideos():
-    # blink.download_videos('BCconfig.downloaddirectory', since='BCconfig.downloaddate', delay=BCconfig.downloaddelay)
+async def downloadAllVideos():
+    if os.path.isdir(BCconfig.downloaddirectory):
+        print("Directory exists, now downloading files.")
+        await blink.download_videos('BCconfig.downloaddirectory', since='BCconfig.downloaddate', delay=BCconfig.downloaddelay)
+    else:
+            print(f"The directory specified in BCconfig.py does not exist, now creating")
+            os.mkdir(BCConfig.downloaddirectory)
+            blink.download_videos('BCconfig.downloaddirectory', since='BCconfig.downloaddate', delay=BCconfig.downloaddelay)
+   
     messagebox.showinfo("Videos have been downloaded successfully.")
 
 
 # Updates the picture that shows up when you open the app.
-def takePicture():
+async def takePicture():
     camera = blink.cameras[BCconfig.cameramodule]
-    camera.snap_picture()
-    blink.refresh(force=True)
-
-# uhh i forgot?
-def downloadLatest():
-    camera = blink.cameras[BCconfig.cameramodule]
-    camera.get_thumbnail()
-    camera.image_from_cache.raw
+    await camera.snap_picture()
+    await blink.refresh(force=True)
 
 
 # Initalize and pack UI elements here.
@@ -69,3 +70,8 @@ top.title("Blink Controls")
 
 screen.configure(bg=BCconfig.backgroundcolor) 
 screen.mainloop()
+
+#def downloadLatest():
+ #   camera = blink.cameras[BCconfig.cameramodule]
+ #  await camera.get_thumbnail()
+ # await camera.image_from_cache.raw
