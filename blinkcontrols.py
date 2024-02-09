@@ -4,7 +4,7 @@ from blinkpy.api import *
 from tkinter import *
 from pathlib import Path
 from aiohttp import ClientSession
-from BCconfig import * # aware of the bad code practice, will fix later.
+import BCconfig
 import tkinter
 import os
 import requests
@@ -66,7 +66,7 @@ async def takePicture():
 
 
 # Initalize and pack UI elements here.
-top.title("Blink Controls")
+screen.title("Blink Controls")
 
 screen.configure(bg=BCconfig.backgroundcolor) 
 screen.mainloop()
