@@ -54,7 +54,6 @@ async def downloadAllVideos():
             print(f"The directory specified in BCconfig.py does not exist, now creating")
             os.mkdir(BCConfig.downloaddirectory)
             blink.download_videos('BCconfig.downloaddirectory', since='BCconfig.downloaddate', delay=BCconfig.downloaddelay)
-   
     messagebox.showinfo("Videos have been downloaded successfully.")
 
 
@@ -67,10 +66,8 @@ async def takePicture():
 
 # Initalize and pack UI elements here.
 screen.title("Blink Controls")
-
-screen.configure(bg=BCconfig.backgroundcolor) 
+screen.configure(bg=white)
 screen.mainloop()
-
 #def downloadLatest():
  #   camera = blink.cameras[BCconfig.cameramodule]
  #  await camera.get_thumbnail()
